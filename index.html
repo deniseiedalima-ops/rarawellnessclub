@@ -13,6 +13,9 @@
 @media(max-width:950px){.side{width:205px}.main{margin-left:205px;width:calc(100% - 205px);padding:25px 22px}.stats{grid-template-columns:repeat(2,1fr)}.dashgrid{grid-template-columns:1fr}.idea-grid,.post-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:650px){.checklist-layout{grid-template-columns:1fr}.checklist-sidebar{position:static}.checklist-board-list{display:flex;overflow:auto;padding-bottom:3px}.board-btn{white-space:nowrap}.sticky-grid{grid-template-columns:1fr}.side{position:fixed;inset:auto 0 0;width:100%;height:66px;padding:5px 7px;border-right:0;border-top:1px solid var(--line)}.brand,.workspace,.side-bottom{display:none}.nav{display:flex;justify-content:space-around;gap:0}.nav button{padding:9px 7px;display:grid;justify-items:center;gap:2px;font-size:9px;flex:1}.nav .ico{font-size:17px}.main{margin:0;width:100%;padding:23px 15px 90px}.top{margin-bottom:22px}.page-title{font-size:29px}.topright .userlabel{display:none}.stats{gap:9px}.card{padding:15px}.stat-value{font-size:25px}.event-layout{grid-template-columns:1fr}.event-list{grid-template-columns:repeat(2,1fr)}.idea-grid,.post-grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.wide{grid-column:auto}}
 
+
+.partner-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
+.partner-edit-btn{padding:8px 15px!important;font-size:13px!important;min-height:36px}
 </style></head>
 <body>
 <div class="app">
@@ -356,7 +359,7 @@ function renderPartners(){
    ${x.contact?`<div class="muted" style="margin-top:8px">Contato: ${esc(x.contact)}</div>`:''}
    ${x.social?`<div class="muted" style="margin-top:5px;overflow-wrap:anywhere">${esc(x.social)}</div>`:''}
    ${x.notes?`<p class="muted" style="margin-top:10px">${esc(x.notes)}</p>`:''}
-   <div style="margin-top:14px;display:flex;gap:14px"><button class="small-link" onclick="editPartner('${x.id}')">editar</button><button class="small-link" onclick="removeItem('partners','${x.id}')">remover registro</button></div>
+   <div class="partner-actions"><button type="button" class="btn partner-edit-btn" onclick="editPartner('${x.id}')">✎ Editar</button><button type="button" class="small-link" onclick="removeItem('partners','${x.id}')">remover registro</button></div>
   </article>`;
  }).join('')||'<div class="empty">Nenhuma marca cadastrada. Adicione sua primeira parceria ou investimento.</div>';
 }
