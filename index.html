@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RARA | Management Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#344b55;--muted:#829096;--blue:#b9d5df;--blue2:#e8f1f3;--pink:#f3dfe0;--pink2:#fbf1f0;--green:#dce8d9;--green2:#f1f5ef;--cream:#f7f4ee;--paper:#fffdfa;--brown:#9a806d;--line:#e9e5df;--shadow:0 12px 34px #344b550d}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:14px}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:flex;min-height:100vh}.side{width:246px;background:#fffdfa;border-right:1px solid var(--line);padding:28px 17px;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:4}.brand{padding:4px 13px 30px;display:flex;align-items:center;gap:11px}.brand-mark{width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:grid;place-items:center;background:#f2ece5;border:1px solid #e8ded4;color:var(--brown);font:500 27px Fraunces,serif;line-height:1}.brand-copy{min-width:0}.brand-name{font:500 34px Fraunces,serif;letter-spacing:2px;color:#9bbdca}.brand-sub{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--brown);margin-top:3px}.workspace{font-size:10px;text-transform:uppercase;letter-spacing:1.7px;color:#a0a8a8;padding:8px 13px 10px}.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;text-align:left;color:#74858a;padding:12px 13px;border-radius:11px;display:flex;align-items:center;gap:12px}.nav button:hover,.nav button.active{background:var(--blue2);color:#405c67}.nav button{transition:background .18s ease,color .18s ease}.page{animation:pageIn .22s ease}@keyframes pageIn{from{opacity:.65;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.nav .ico{width:18px;text-align:center;font-size:16px}.side-bottom{margin-top:auto;padding:15px 12px;border-top:1px solid var(--line);color:#899497;font-size:11px;line-height:1.7}.sync{display:flex;gap:7px;align-items:center;margin-bottom:9px}.dot{width:7px;height:7px;border-radius:50%;background:#c7b79e}.dot.on{background:#8caf9c}.main{margin-left:246px;width:calc(100% - 246px);padding:30px 38px 60px;max-width:1600px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}.eyebrow{text-transform:uppercase;letter-spacing:2px;color:#a18d7d;font-size:10px}.page-title{font:500 34px Fraunces,serif;margin:6px 0 0}.topright{display:flex;align-items:center;gap:12px}.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--pink);color:#8c6f6d;font-weight:600}.btn{border:0;border-radius:10px;padding:10px 15px;background:var(--ink);color:white;font-size:12px}.btn.soft{background:var(--blue2);color:var(--ink)}.btn.outline{background:transparent;border:1px solid var(--line);color:var(--ink)}.btn.pink{background:var(--pink);color:#775f60}.grid{display:grid;gap:16px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}.stat-label{font-size:11px;color:#879397}.stat-value{font:500 30px Fraunces,serif;margin:9px 0 3px}.stat-note{font-size:10px;color:#a1a6a2}.dashgrid{grid-template-columns:1.25fr .85fr;align-items:start}.count-card{background:var(--blue2);border:0;min-height:225px;position:relative;overflow:hidden}.count-card:after{content:"r";font:220px Fraunces,serif;position:absolute;right:12px;bottom:-85px;color:#ffffff80}.count-number{font:500 76px Fraunces,serif;line-height:1;margin:15px 0 5px}.count-caption{font-size:12px;color:#687e84}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.section-head h3{font:500 20px Fraunces,serif;margin:0}.muted{color:var(--muted)}.list{display:grid;gap:9px}.item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #f0ede8}.item:last-child{border:0}.item strong{font-size:12px;font-weight:600}.item small{display:block;color:#9aa2a1;font-size:10px;margin-top:4px}.pill{font-size:10px;border-radius:30px;padding:5px 9px;background:var(--green2);color:#718675;white-space:nowrap}.pill.pink{background:var(--pink2);color:#9a7777}.pill.blue{background:var(--blue2);color:#66818b}.page{display:none}.page.active{display:block}.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:17px}.toolbar input,.toolbar select,.field input,.field select,.field textarea{border:1px solid var(--line);background:#fffdfa;border-radius:9px;padding:10px 11px;color:var(--ink);outline:none;width:100%}.toolbar input{max-width:260px}.field{display:grid;gap:6px;margin:11px 0}.field label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8b9697}.field textarea{min-height:82px;resize:vertical}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 13px}.wide{grid-column:1/-1}.tablewrap{overflow:auto}.data-table{width:100%;border-collapse:collapse;font-size:12px}.data-table th{text-align:left;color:#98a1a0;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:500;padding:10px;border-bottom:1px solid var(--line)}.data-table td{padding:12px 10px;border-bottom:1px solid #f0ede8}.amount-in{color:#72917d}.amount-out{color:#b17d7c}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 18px}.tab{border:1px solid var(--line);border-radius:30px;background:transparent;padding:8px 13px;color:#879397;font-size:11px}.tab.active{background:var(--blue2);border-color:var(--blue2);color:var(--ink)}.event-layout{display:grid;grid-template-columns:290px 1fr;gap:16px}.event-list{display:grid;gap:8px;align-content:start}.event-choice{padding:14px;border:1px solid var(--line);border-radius:12px;background:#fffdfa;text-align:left;color:var(--ink)}.event-choice.active{border-color:#b8d2dc;background:var(--blue2)}.event-choice b{display:block;font:500 16px Fraunces,serif}.event-choice small{display:block;color:#8b9899;margin-top:5px}.checkline{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f0ede8}.checkline input{accent-color:#8eabb6;margin-top:3px}.checkline.done span{text-decoration:line-through;color:#a8afad}.progress{height:6px;background:#edf0eb;border-radius:20px;overflow:hidden;margin:10px 0 16px}.progress span{display:block;height:100%;background:#a9c5b0}.idea-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.idea{min-height:140px;position:relative}.idea p{white-space:pre-wrap;color:#718084;line-height:1.6;font-size:12px}.idea .tag{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#a18d7d}.post-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.post{border-top:3px solid var(--blue);}.post:nth-child(3n+2){border-top-color:#e9cfd0}.post:nth-child(3n){border-top-color:#d6e2d3}.post h4{font:500 17px Fraunces,serif;margin:10px 0}.post p{font-size:11px;color:#7d898c;line-height:1.6}.empty{padding:24px;text-align:center;color:#a0a9a7;font-size:12px}.modal{position:fixed;inset:0;background:#263b4380;z-index:10;display:none;align-items:center;justify-content:center;padding:18px}.modal.open{display:flex}.modalbox{width:min(560px,100%);max-height:90vh;overflow:auto;background:var(--paper);border-radius:18px;padding:24px;box-shadow:0 20px 60px #0002}.modalhead{display:flex;justify-content:space-between;align-items:center}.modalhead h3{font:500 23px Fraunces,serif;margin:0}.close{border:0;background:transparent;font-size:22px;color:#879397}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:17px}.notice{background:var(--pink2);border-radius:12px;padding:12px 14px;color:#8d7474;font-size:11px;line-height:1.6;margin-bottom:15px}.hidden{display:none!important}.small-link{border:0;background:none;color:#82999f;font-size:11px;text-decoration:underline}.mobilehead{display:none}
+.checklist-layout{display:grid;grid-template-columns:235px minmax(0,1fr);gap:15px;align-items:start}.checklist-sidebar{position:sticky;top:18px}.checklist-board-list{display:grid;gap:6px;margin-top:13px}.board-btn{border:0;background:transparent;text-align:left;padding:11px 12px;border-radius:10px;color:#718084;font-size:12px;display:flex;justify-content:space-between;gap:8px}.board-btn:hover,.board-btn.active{background:var(--blue2);color:var(--ink)}.board-btn small{color:#9aa5a5}.checklist-content{min-height:330px}.sticky-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.sticky-note{background:#fbf4e7;border:1px solid #eee4d3;border-radius:12px;padding:15px;min-height:150px;display:flex;flex-direction:column}.sticky-note.priority-urgent{background:#fbefed;border-color:#f0d9d6}.sticky-note.priority-medium{background:#eef4f6;border-color:#dce9ed}.sticky-note.priority-low{background:#f0f4ed;border-color:#e0e9dc}.sticky-note.completed{opacity:.62}.sticky-note.completed h4{text-decoration:line-through}.sticky-note h4{font:500 18px Fraunces,serif;margin:10px 0 6px}.sticky-note p{font-size:11px;line-height:1.55;color:#788486;white-space:pre-wrap;margin:0 0 12px}.sticky-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.sticky-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:12px}.priority-chip{font-size:9px;text-transform:uppercase;letter-spacing:.8px;border-radius:30px;padding:5px 8px;background:#fff9}.check-action{border:0;background:transparent;color:#78919a;font-size:11px;padding:3px}.dashboard-task{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid #f0ede8}.dashboard-task:last-child{border:0}.dashboard-task input{margin-top:3px;accent-color:#8eabb6}.dashboard-task strong{font-size:12px}.dashboard-task small{display:block;color:#9aa2a1;font-size:10px;margin-top:3px}
+@media(max-width:950px){.side{width:205px}.main{margin-left:205px;width:calc(100% - 205px);padding:25px 22px}.stats{grid-template-columns:repeat(2,1fr)}.dashgrid{grid-template-columns:1fr}.idea-grid,.post-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.checklist-layout{grid-template-columns:1fr}.checklist-sidebar{position:static}.checklist-board-list{display:flex;overflow:auto;padding-bottom:3px}.board-btn{white-space:nowrap}.sticky-grid{grid-template-columns:1fr}.side{position:fixed;inset:auto 0 0;width:100%;height:66px;padding:5px 7px;border-right:0;border-top:1px solid var(--line)}.brand,.workspace,.side-bottom{display:none}.nav{display:flex;justify-content:space-around;gap:0}.nav button{padding:9px 7px;display:grid;justify-items:center;gap:2px;font-size:9px;flex:1}.nav .ico{font-size:17px}.main{margin:0;width:100%;padding:23px 15px 90px}.top{margin-bottom:22px}.page-title{font-size:29px}.topright .userlabel{display:none}.stats{gap:9px}.card{padding:15px}.stat-value{font-size:25px}.event-layout{grid-template-columns:1fr}.event-list{grid-template-columns:repeat(2,1fr)}.idea-grid,.post-grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.wide{grid-column:auto}}
+
+</style></head>
+<body>
+<div class="app">
+<aside class="side">
+ <div class="brand"><div class="brand-mark" aria-label="RARA monograma">R</div><div class="brand-copy"><div class="brand-name">rara</div><div class="brand-sub">wellness club · workspace</div></div></div>
+ <div class="workspace">workspace</div>
+ <nav class="nav">
+  <button class="active" data-page="dashboard"><span class="ico">⌂</span>Dashboard</button>
+  <button data-page="finance"><span class="ico">◷</span>Financeiro</button>
+  <button data-page="ideas"><span class="ico">✳</span>Ideias</button>
+  <button data-page="events"><span class="ico">❋</span>Eventos</button>
+  <button data-page="instagram"><span class="ico">◎</span>Instagram</button>
+  <button data-page="links"><span class="ico">↗</span>Links</button>
+  <button data-page="checklist"><span class="ico">☷</span>Checklist</button>
+  <button data-page="partners"><span class="ico">♡</span>Parceiros</button>
+ </nav>
+ <div class="side-bottom"><div class="sync"><span class="dot" id="syncDot"></span><span id="syncText">Modo local · neste navegador</span></div><button class="small-link" onclick="openSettings()">Configurar sincronização online</button><br>RARA · made with care 🤎</div>
+</aside>
+<main class="main">
+<header class="top"><div><div class="eyebrow">RARA / MANAGEMENT HUB</div><h1 class="page-title" id="pageTitle">Dashboard</h1></div><div class="topright"><span class="userlabel muted" id="todayLabel"></span><div class="avatar">R</div></div></header>
+
+<section class="page active" id="dashboard">
+ <div class="grid stats">
+  <div class="card"><div class="stat-label">Dias até The Soft Reset</div><div class="stat-value" id="daysStat">—</div><div class="stat-note">05 dezembro 2026 · evento principal</div></div>
+  <div class="card"><div class="stat-label">Saldo registrado</div><div class="stat-value" id="balanceStat">R$ 0</div><div class="stat-note">Receitas menos despesas</div></div>
+  <div class="card"><div class="stat-label">Eventos no workspace</div><div class="stat-value" id="eventsStat">0</div><div class="stat-note">Planejados e realizados</div></div>
+  <div class="card"><div class="stat-label">Posts planejados</div><div class="stat-value" id="postsStat">0</div><div class="stat-note">No calendário de conteúdo</div></div>
+ </div>
+ <div class="grid dashgrid">
+  <div class="grid">
+   <div class="card count-card"><div class="eyebrow">our next chapter</div><div class="count-number" id="heroDays">33</div><div class="count-caption">dias para o primeiro encontro · The Soft Reset</div><div style="margin-top:20px"><span class="pill">05.12.2026 · Imperatriz, MA</span></div></div>
+   <div class="card"><div class="section-head"><h3>Próximos compromissos</h3><button class="small-link" onclick="go('events')">ver eventos</button></div><div class="list" id="upcomingList"></div></div>
+  </div>
+  <div class="grid">
+   <div class="card"><div class="section-head"><h3>Visão financeira</h3><button class="small-link" onclick="go('finance')">abrir financeiro</button></div><div class="list" id="financePreview"></div></div>
+   <div class="card"><div class="section-head"><h3>Checklist em andamento</h3><span class="pill blue" id="taskCount">0 tarefas</span></div><div id="taskPreview"></div></div>
+  </div>
+ </div>
+ <div class="card" style="margin-top:16px"><div class="section-head"><div><h3>To-do da RARA</h3><span class="muted">Tarefas pendentes por prioridade</span></div><button class="small-link" onclick="go('checklist')">abrir checklist ↗</button></div>
+ <div class="grid stats" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px"><div><span class="pill pink">Urgente</span><div class="stat-value" id="dashUrgent" style="font-size:23px">0</div></div><div><span class="pill blue">Média</span><div class="stat-value" id="dashMedium" style="font-size:23px">0</div></div><div><span class="pill">Baixa</span><div class="stat-value" id="dashLow" style="font-size:23px">0</div></div></div><div id="dashboardChecklist"></div></div>
+</section>
+
+<section class="page" id="finance">
+ <div class="toolbar"><button class="btn" onclick="openModal('transaction')">＋ Novo lançamento</button><button class="btn soft" onclick="exportCSV()">Exportar CSV</button><select id="financeFilter" onchange="renderFinance()" style="max-width:170px"><option value="all">Todos os lançamentos</option><option value="income">Receitas</option><option value="expense">Despesas</option></select></div>
+ <div class="grid stats">
+  <div class="card"><div class="stat-label">Receitas</div><div class="stat-value amount-in" id="incomeTotal">R$ 0</div></div>
+  <div class="card"><div class="stat-label">Despesas</div><div class="stat-value amount-out" id="expenseTotal">R$ 0</div></div>
+  <div class="card"><div class="stat-label">Saldo</div><div class="stat-value" id="netTotal">R$ 0</div></div>
+  <div class="card"><div class="stat-label">Lançamentos</div><div class="stat-value" id="transactionCount">0</div></div>
+ </div>
+ <div class="grid dashgrid">
+  <div class="card"><div class="section-head"><h3>Fluxo de caixa</h3><span class="muted">por mês</span></div><div id="cashflow" class="list"></div></div>
+  <div class="card"><div class="section-head"><h3>Controles da empresa</h3></div><div class="list">
+   <div class="item"><div><strong>Fornecedores & parceiros</strong><small>Cadastre custos, contatos e acordos como despesas/observações</small></div><span class="pill">Operação</span></div>
+   <div class="item"><div><strong>Orçamento por evento</strong><small>Use a categoria e o nome do evento em cada lançamento</small></div><span class="pill">Eventos</span></div>
+   <div class="item"><div><strong>Contas a pagar / receber</strong><small>Use o status pendente e acompanhe os vencimentos</small></div><span class="pill pink">Atenção</span></div>
+   <div class="item"><div><strong>Marketing & operação</strong><small>Registre mídia, materiais, transporte e taxas</small></div><span class="pill blue">Gestão</span></div>
+  </div></div>
+ </div>
+ <div class="card" style="margin-top:16px"><div class="section-head"><h3>Todos os lançamentos</h3><span class="muted" id="financeCaption"></span></div><div class="tablewrap"><table class="data-table"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Evento</th><th>Status</th><th>Valor</th><th></th></tr></thead><tbody id="transactionsBody"></tbody></table></div></div>
+</section>
+
+<section class="page" id="ideas">
+ <div class="toolbar"><button class="btn" onclick="openModal('idea')">＋ Capturar ideia</button><select id="ideaFilter" onchange="renderIdeas()" style="max-width:180px"><option value="all">Todas as categorias</option><option>Experiências</option><option>Parcerias</option><option>Produtos</option><option>Conteúdo</option><option>Operação</option><option>Outras</option></select></div>
+ <div class="notice">Um espaço livre para guardar ideias antes que elas se percam. Depois, transforme as melhores em tarefas ou eventos.</div>
+ <div class="grid idea-grid" id="ideasGrid"></div>
+</section>
+
+<section class="page" id="events">
+ <div class="toolbar"><button class="btn" onclick="openModal('event')">＋ Novo evento</button><span class="muted">Cada evento pode ter seu próprio espaço, páginas e checklists.</span></div>
+ <div class="event-layout"><div class="event-list" id="eventList"></div><div class="card" id="eventDetail"><div class="empty">Selecione um evento para abrir seu workspace.</div></div></div>
+</section>
+
+<section class="page" id="instagram">
+ <div class="toolbar"><button class="btn" onclick="openModal('post')">＋ Nova ideia de post</button><select id="postFilter" onchange="renderInstagram()" style="max-width:180px"><option value="all">Todos os conteúdos</option><option>Ideia</option><option>Em produção</option><option>Agendado</option><option>Publicado</option></select></div>
+ <div class="grid stats">
+  <div class="card"><div class="stat-label">Ideias no banco</div><div class="stat-value" id="postIdeas">0</div></div>
+  <div class="card"><div class="stat-label">Agendados</div><div class="stat-value" id="postScheduled">0</div></div>
+  <div class="card"><div class="stat-label">Publicados</div><div class="stat-value" id="postPublished">0</div></div>
+  <div class="card"><div class="stat-label">Próxima publicação</div><div class="stat-value" style="font-size:20px" id="nextPost">—</div></div>
+ </div>
+ <div class="section-head"><h3>Content studio</h3><span class="muted">Ideias · calendário · histórico</span></div><div class="grid post-grid" id="postsGrid"></div>
+</section>
+
+<section class="page" id="checklist">
+ <div class="toolbar"><button class="btn" onclick="openModal('checktask')">＋ Novo post-it</button><button class="btn soft" onclick="addChecklistBoard()">＋ Nova subaba</button><span class="muted">Organize tarefas em cadernos e subabas, como no OneNote.</span></div>
+ <div class="notice">Crie subabas para cada frente da RARA — Post-its, Evento, Instagram, Parcerias ou Operação. Cada subaba tem seus próprios cartões.</div>
+ <div class="checklist-layout"><aside class="card checklist-sidebar"><div class="eyebrow">CADERNOS / SUBABAS</div><div id="checklistBoards" class="checklist-board-list"></div></aside><div class="card checklist-content" id="checklistContent"><div class="empty">Escolha uma subaba para visualizar seus post-its.</div></div></div>
+</section>
+<section class="page" id="links">
+ <div class="toolbar">
+  <button class="btn" onclick="openModal('link')">＋ Adicionar link</button>
+  <input id="linkSearch" type="search" placeholder="Buscar por título..." oninput="renderLinks()" aria-label="Buscar links">
+  <span class="muted">Seus acessos importantes, sempre à mão.</span>
+ </div>
+ <div class="notice">Guarde aqui links de fornecedores, documentos, formulários, pastas, referências, redes sociais e ferramentas da RARA. Cada link fica salvo no workspace.</div>
+ <div class="grid idea-grid" id="linksGrid"></div>
+</section>
+<section class="page" id="partners">
+ <div class="toolbar">
+  <button class="btn" onclick="openModal('partner')">＋ Adicionar marca</button>
+  <input id="partnerSearch" type="search" placeholder="Buscar marca..." oninput="renderPartners()" aria-label="Buscar parceiros">
+  <span class="muted">Marcas, investimentos e parcerias da RARA.</span>
+ </div>
+ <div class="grid stats" style="margin-bottom:18px">
+  <div class="card"><div class="stat-label">Marcas cadastradas</div><div class="stat-value" id="partnerCount">0</div></div>
+  <div class="card"><div class="stat-label">Investimentos</div><div class="stat-value" id="partnerInvestmentCount">0</div></div>
+  <div class="card"><div class="stat-label">Parcerias</div><div class="stat-value" id="partnerPartnershipCount">0</div></div>
+ </div>
+ <div class="notice">Cadastre marcas que apoiam a RARA, patrocinadores, permutas, fornecedores parceiros e investimentos. Os registros ficam organizados neste workspace.</div>
+ <div class="grid idea-grid" id="partnersGrid"></div>
+</section>
+</main></div>
+
+<div class="modal" id="modal"><div class="modalbox"><div class="modalhead"><h3 id="modalTitle">Novo registro</h3><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div><div class="actions"><button class="btn outline" onclick="closeModal()">Cancelar</button><button class="btn" id="saveModal" type="button">Salvar</button></div></div></div>
+<div class="modal" id="settingsModal"><div class="modalbox"><div class="modalhead"><h3>Sincronização online</h3><button class="close" onclick="closeSettings()">×</button></div><div class="notice">Para você e Maria Eduarda editarem os mesmos dados, conecte um projeto Supabase. Use somente a chave pública <b>anon/publishable</b> — nunca a service_role key.</div><div class="field"><label>Supabase Project URL</label><input id="sbUrl" placeholder="https://seu-projeto.supabase.co"></div><div class="field"><label>Supabase anon / publishable key</label><input id="sbKey" placeholder="eyJ..." autocomplete="off"></div><div class="field"><label>E-mail da administradora</label><input id="sbEmail" type="email" placeholder="voce@exemplo.com" autocomplete="username"></div><div class="field"><label>Senha</label><input id="sbPassword" type="password" placeholder="Senha da conta RARA" autocomplete="current-password"></div><div class="actions"><button class="btn outline" onclick="closeSettings()">Cancelar</button><button class="btn" onclick="connectCloud()">Conectar</button></div><p class="muted" style="font-size:10px;line-height:1.6">A URL e a chave pública ficam salvas neste navegador; a senha não é salva. Crie as duas contas no Supabase Authentication e desative cadastros públicos.</p></div></div>
+
+<script>
+const KEY='rara_hub_v1';
+const initial={transactions:[],ideas:[],partners:[],events:[{id:'soft-reset',name:'The Soft Reset',date:'2026-12-05',place:'Espaço Bougainville · Imperatriz, MA',status:'Em planejamento',description:'Primeiro encontro oficial da RARA Wellness Club.',pages:[{id:'p1',name:'Planejamento geral',tasks:['Confirmar fornecedores e orçamento','Fechar parcerias e expositoras','Definir programação final','Organizar inscrições e pagamentos','Contratar fotografia e cobertura','Preparar kits de Vision Board']},{id:'p2',name:'Experiência & ambientação',tasks:['Planejar aula de alongamento','Alinhar palestra com psicóloga','Organizar atividade de Vision Board','Definir coffee break','Preparar sinalização e decoração']}]}],posts:[]};
+let data=load(), cloud=null, selectedEvent=null, activeEventPage=null, activePage='dashboard', modalType=null;
+if(!data || typeof data!=='object' || Array.isArray(data)) data=structuredClone(initial);
+for(const key of ['transactions','ideas','partners','events','posts','links']) if(!Array.isArray(data[key])) data[key]=[];
+if(!Array.isArray(data.checklists)) data.checklists=[];
+if(!data.checklists.length) data.checklists=[{id:"general-board",name:"Post-its",tasks:[]}];
+data.checklists=data.checklists.map((board,index)=>({
+ ...board,
+ id:board.id||uid(),
+ name:board.name||`Subaba ${index+1}`,
+ tasks:Array.isArray(board.tasks)?board.tasks:[]
+}));
+let selectedChecklistBoard=data.checklists[0]?.id||null;
+function uid(){
+ if(globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+ return 'rara-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+}
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||structuredClone(initial)}catch{return structuredClone(initial)}}
+function persist(){
+ try{
+  localStorage.setItem(KEY,JSON.stringify(data));
+ }catch(err){
+  console.error('Falha ao salvar dados localmente:',err);
+  alert('Não foi possível salvar neste navegador. Verifique as permissões e o espaço de armazenamento.');
+  return false;
+ }
+ if(cloud) saveCloud().catch(err=>{
+  console.error('Falha na sincronização:',err);
+  alert('O registro foi salvo neste navegador, mas não foi sincronizado. Confira a configuração do banco Supabase.');
+ });
+ try{renderAll()}catch(err){
+  console.error('Os dados foram salvos, mas houve um erro ao atualizar a tela:',err);
+ }
+ return true;
+}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function money(n){return Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function dateBR(d){if(!d)return '—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR')}
+function daysTo(d){return Math.ceil((new Date(d+'T00:00:00')-new Date(new Date().toDateString()))/86400000)}
+function go(p, updateHash=true){
+ const allowed=['dashboard','finance','ideas','events','instagram','links','checklist','partners'];
+ if(!allowed.includes(p)) p='dashboard';
+ activePage=p;
+ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===p));
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
+ document.getElementById('pageTitle').textContent={dashboard:'Dashboard',finance:'Financeiro',ideas:'Ideias',events:'Eventos',instagram:'Instagram',links:'Links',checklist:'Checklist',partners:'Parceiros'}[p];
+ if(updateHash && location.hash!=='#'+p) history.replaceState(null,'','#'+p);
+ renderAll();
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+window.addEventListener('hashchange',()=>go(location.hash.slice(1),false));
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
+function openModal(type,extra={}){modalType=type;document.getElementById('modal').classList.add('open');const body=document.getElementById('modalBody');let title='',fields='';
+const f=(label,name,kind='text',value='',opts='')=>{let control=kind==='textarea'?`<textarea name="${name}" ${opts}>${esc(value)}</textarea>`:kind==='select'?`<select name="${name}">${opts}</select>`:`<input name="${name}" type="${kind}" value="${esc(value)}" ${opts}>`;return `<div class="field"><label>${label}</label>${control}</div>`};
+if(type==='transaction'){title='Novo lançamento';fields=`<div class="formgrid">${f('Tipo','type','select','','<option value="expense">Despesa</option><option value="income">Receita</option>')}${f('Valor (R$)','amount','number','','step="0.01" min="0" required')}${f('Descrição','description','text','','required')}${f('Data','date','date',new Date().toISOString().slice(0,10))}${f('Categoria','category','select','','<option>Evento</option><option>Marketing</option><option>Fornecedor</option><option>Produto</option><option>Inscrição</option><option>Parceria</option><option>Operação</option><option>Transporte</option><option>Outros</option>')}${f('Status','status','select','','<option>Pago/Recebido</option><option>Pendente</option>')}${f('Evento relacionado','event','text','','placeholder="Ex.: The Soft Reset"')}${f('Observações','notes','textarea','','')}</div>`}
+if(type==='idea'){title='Capturar ideia';fields=`${f('Título','title','text','','required')}${f('Categoria','category','select','','<option>Experiências</option><option>Parcerias</option><option>Produtos</option><option>Conteúdo</option><option>Operação</option><option>Outras</option>')}${f('Descrição / referências','description','textarea')}${f('Próximo passo','next','text')}`}
+if(type==='event'){title='Criar evento';fields=`${f('Nome do evento','name','text','','required')}${f('Data','date','date')}${f('Local','place')}${f('Status','status','select','','<option>Em planejamento</option><option>Confirmado</option><option>Realizado</option><option>Adiado</option>')}${f('Descrição','description','textarea')}`}
+if(type==='post'){title='Novo conteúdo';fields=`${f('Título / ideia','title','text','','required')}${f('Formato','format','select','','<option>Reels</option><option>Carrossel</option><option>Stories</option><option>Foto</option><option>Live</option>')}${f('Pilar','pillar','select','','<option>Wellness</option><option>Movimento</option><option>Criatividade</option><option>Comunidade</option><option>Bastidores</option><option>Institucional</option>')}${f('Data de publicação','date','date')}${f('Status','status','select','','<option>Ideia</option><option>Em produção</option><option>Agendado</option><option>Publicado</option>')}${f('Legenda / roteiro / referências','description','textarea')}${f('Link do post publicado','link','url')}`}
+if(type==='link'){title='Adicionar link';fields=`${f('Título do link','title','text','','required placeholder="Ex.: Pasta de identidade visual"')}${f('Endereço (URL)','url','url','','required placeholder="https://..."')}${f('Categoria','category','select','','<option>Documentos</option><option>Fornecedores</option><option>Ferramentas</option><option>Redes sociais</option><option>Formulários</option><option>Referências</option><option>Outros</option>')}${f('Observação (opcional)','notes','textarea','','placeholder="O que encontramos neste link?"')}`}
+if(type==='partner'||type==='partner-edit'){
+ const editing=type==='partner-edit',item=editing?(data.partners||[]).find(x=>x.id===extra.id):null;
+ const relOpt=(v,l)=>`<option value="${esc(v)}" ${item?.relationship===v?'selected':''}>${l}</option>`;
+ const statusOpt=v=>`<option ${item?.status===v?'selected':''}>${v}</option>`;
+ title=editing?'Editar parceria':'Cadastrar marca / parceiro';
+ fields=`${f('Nome da marca','brand','text',item?.brand||'','required')}
+ ${f('Tipo de relação','relationship','select','',`${relOpt('Parceria','Parceria')}${relOpt('Investimento','Investimento / patrocínio')}${relOpt('Permuta','Permuta')}${relOpt('Fornecedor parceiro','Fornecedor parceiro')}${relOpt('Apoio','Apoio')}`)}
+ ${f('Valor do investimento (R$)','amount','number',item?.amount||'','min="0" step="0.01"')}
+ ${f('O que a marca oferece','contribution','textarea',item?.contribution||'')}
+ ${f('Contato / responsável','contact','text',item?.contact||'')}
+ ${f('Instagram ou site','social','text',item?.social||'')}
+ ${f('Status','status','select','',`${statusOpt('Em negociação')}${statusOpt('Confirmado')}${statusOpt('Concluído')}${statusOpt('Não avançou')}`)}
+ ${f('Observações','notes','textarea',item?.notes||'')}`;
+ if(editing) window.editingPartnerId=item?.id||null;
+}
+if(type==='checktask'){title='Novo post-it';let opts=data.checklists.map(b=>`<option value="${esc(b.id)}" ${b.id===selectedChecklistBoard?'selected':''}>${esc(b.name)}</option>`).join('');fields=`${f('Título da tarefa','title','text','','required placeholder="Ex.: Finalizar proposta para marcas"')}${f('Descrição','description','textarea','','placeholder="Detalhes, contexto ou próximos passos..."')}${f('Subaba','board','select','',opts)}${f('Prioridade','priority','select','','<option value="Urgente">Urgente</option><option value="Média" selected>Média</option><option value="Baixa">Baixa</option>')}${f('Prazo (opcional)','due','date')}`}
+body.innerHTML=fields;document.getElementById('modalTitle').textContent=title;document.getElementById('saveModal').onclick=saveModal}
+function val(n){return document.querySelector(`#modalBody [name="${n}"]`)?.value||''}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function saveModal(){
+ const id=uid();
+ try{
+  if(modalType==='transaction') data.transactions.unshift({id,type:val('type'),amount:+val('amount'),description:val('description'),date:val('date'),category:val('category'),status:val('status'),event:val('event'),notes:val('notes')});
+  else if(modalType==='idea') data.ideas.unshift({id,title:val('title').trim(),category:val('category'),description:val('description'),next:val('next'),created:new Date().toISOString()});
+  else if(modalType==='event') data.events.push({id,name:val('name').trim(),date:val('date'),place:val('place'),status:val('status'),description:val('description'),pages:[{id:uid(),name:'Planejamento geral',tasks:[]}]});
+  else if(modalType==='partner'||modalType==='partner-edit'){
+   const record={brand:val('brand').trim(),relationship:val('relationship'),amount:Number(val('amount')||0),contribution:val('contribution').trim(),contact:val('contact').trim(),social:val('social').trim(),status:val('status'),notes:val('notes').trim()};
+   if(!record.brand){alert('Informe o nome da marca.');return}
+   if(modalType==='partner-edit'){
+    const existing=data.partners.find(x=>x.id===window.editingPartnerId);
+    if(!existing){alert('Parceria não encontrada.');return}
+    Object.assign(existing,record,{updated:new Date().toISOString()});
+    window.editingPartnerId=null;
+   }else data.partners.unshift({id,...record,created:new Date().toISOString()});
+  }
+  else if(modalType==='post') data.posts.unshift({id,title:val('title').trim(),format:val('format'),pillar:val('pillar'),date:val('date'),status:val('status'),description:val('description'),link:val('link')});
+  else if(modalType==='link'){
+   const title=val('title').trim();
+   let raw=val('url').trim();
+   if(!title){alert('Digite um título para este link.');return}
+   if(!raw){alert('Cole o endereço do link.');return}
+   if(!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(raw)) raw='https://'+raw;
+   let parsed;
+   try{parsed=new URL(raw)}catch{alert('Esse endereço não parece válido. Confira o link e tente novamente.');return}
+   if(!['http:','https:'].includes(parsed.protocol)){alert('Use um endereço HTTP ou HTTPS.');return}
+   if(!Array.isArray(data.links)) data.links=[];
+   data.links.unshift({id,title,url:parsed.href,category:val('category')||'Outros',notes:val('notes').trim(),created:new Date().toISOString()});
+  }
+  else if(modalType==='checktask'){
+   const title=val('title').trim();
+   if(!title){alert('Digite um título para o post-it.');return}
+   if(!Array.isArray(data.checklists)) data.checklists=[];
+   let board=data.checklists.find(b=>b.id===val('board'))||data.checklists.find(b=>b.id===selectedChecklistBoard);
+   if(!board){alert('Crie ou selecione uma subaba antes de adicionar um post-it.');return}
+   if(!Array.isArray(board.tasks)) board.tasks=[];
+   board.tasks.unshift({id,title,description:val('description').trim(),priority:val('priority')||'Média',due:val('due'),done:false,created:new Date().toISOString()});
+   selectedChecklistBoard=board.id;
+  }
+  // Close first so a rendering problem cannot make the Save button appear unresponsive.
+  closeModal();
+  persist();
+ }catch(err){
+  console.error('Erro ao salvar registro:',err);
+  alert('Ocorreu um erro ao salvar. Atualize a página e tente novamente. Se persistir, abra o console do navegador e envie o erro.');
+ }
+}
+function renderDashboard(){let d=daysTo('2026-12-05');document.getElementById('daysStat').textContent=d;document.getElementById('heroDays').textContent=d;let inc=data.transactions.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0),out=data.transactions.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0);document.getElementById('balanceStat').textContent=money(inc-out);document.getElementById('eventsStat').textContent=data.events.length;document.getElementById('postsStat').textContent=data.posts.length;
+let ev=[...data.events].filter(x=>x.date&&x.date>=new Date().toISOString().slice(0,10)).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);document.getElementById('upcomingList').innerHTML=ev.length?ev.map(x=>`<div class="item"><div><strong>${esc(x.name)}</strong><small>${dateBR(x.date)} · ${esc(x.place||'Local a definir')}</small></div><span class="pill">${esc(x.status||'Planejamento')}</span></div>`).join(''):'<div class="empty">Nenhum compromisso futuro cadastrado.</div>';
+let recent=[...data.transactions].slice(0,4);document.getElementById('financePreview').innerHTML=recent.length?recent.map(x=>`<div class="item"><div><strong>${esc(x.description)}</strong><small>${dateBR(x.date)} · ${esc(x.category)}</small></div><b class="${x.type==='income'?'amount-in':'amount-out'}">${x.type==='income'?'+':'−'} ${money(x.amount)}</b></div>`).join(''):'<div class="empty">Seus lançamentos aparecerão aqui.</div>';
+let tasks=[];data.events.forEach(e=>(e.pages||[]).forEach(p=>(p.tasks||[]).forEach((t,i)=>{if(!t.done)tasks.push({event:e.name,page:p.name,task:t.text||t})})));document.getElementById('taskCount').textContent=tasks.length+' tarefas';document.getElementById('taskPreview').innerHTML=tasks.slice(0,4).map(t=>`<div class="item"><div><strong>${esc(t.task)}</strong><small>${esc(t.event)} · ${esc(t.page)}</small></div><span class="pill pink">Pendente</span></div>`).join('')||'<div class="empty">Tudo em dia por aqui.</div>';
+ const todo=(data.checklists||[]).flatMap(b=>(b.tasks||[]).filter(t=>!t.done).map(t=>({...t,boardName:b.name,boardId:b.id})));
+ const count=p=>todo.filter(t=>t.priority===p).length;
+ document.getElementById('dashUrgent').textContent=count('Urgente');document.getElementById('dashMedium').textContent=count('Média');document.getElementById('dashLow').textContent=count('Baixa');
+ const rank={'Urgente':0,'Média':1,'Baixa':2};todo.sort((a,b)=>(rank[a.priority]??3)-(rank[b.priority]??3)||(a.due||'9999').localeCompare(b.due||'9999'));
+ document.getElementById('dashboardChecklist').innerHTML=todo.slice(0,7).map(t=>`<label class="dashboard-task"><input type="checkbox" onchange="toggleChecklistTask('${t.boardId}','${t.id}',this.checked)"><span><strong>${esc(t.title)}</strong><small>${esc(t.boardName)} · ${esc(t.priority)}${t.due?' · prazo '+dateBR(t.due):''}</small></span></label>`).join('')||'<div class="empty">Nenhuma tarefa pendente. Adicione post-its na aba Checklist.</div>';
+}
+function renderFinance(){let ts=data.transactions,filter=document.getElementById('financeFilter').value;if(filter!=='all')ts=ts.filter(x=>x.type===filter);let inc=data.transactions.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0),out=data.transactions.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0);document.getElementById('incomeTotal').textContent=money(inc);document.getElementById('expenseTotal').textContent=money(out);document.getElementById('netTotal').textContent=money(inc-out);document.getElementById('transactionCount').textContent=data.transactions.length;document.getElementById('financeCaption').textContent=ts.length+' registros';
+document.getElementById('transactionsBody').innerHTML=ts.map(x=>`<tr><td>${dateBR(x.date)}</td><td><b>${esc(x.description)}</b><div class="muted">${esc(x.notes||'')}</div></td><td>${esc(x.category)}</td><td>${esc(x.event||'—')}</td><td><span class="pill ${x.status==='Pendente'?'pink':''}">${esc(x.status)}</span></td><td class="${x.type==='income'?'amount-in':'amount-out'}">${x.type==='income'?'+':'−'} ${money(x.amount)}</td><td><button class="small-link" onclick="removeItem('transactions','${x.id}')">excluir</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">Nenhum lançamento registrado.</td></tr>';
+let months={};data.transactions.forEach(x=>{let m=(x.date||'').slice(0,7);if(!m)return;months[m]??={in:0,out:0};months[m][x.type==='income'?'in':'out']+=x.amount});document.getElementById('cashflow').innerHTML=Object.keys(months).sort().reverse().map(m=>`<div class="item"><div><strong>${new Date(m+'-02').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}</strong><small>Entradas ${money(months[m].in)} · Saídas ${money(months[m].out)}</small></div><b>${money(months[m].in-months[m].out)}</b></div>`).join('')||'<div class="empty">O fluxo de caixa será construído conforme os lançamentos.</div>'}
+function renderIdeas(){let f=document.getElementById('ideaFilter').value,arr=data.ideas.filter(x=>f==='all'||x.category===f);document.getElementById('ideasGrid').innerHTML=arr.map(x=>`<div class="card idea"><div class="tag">${esc(x.category)}</div><h3 style="font:500 20px Fraunces;margin:10px 0 4px">${esc(x.title)}</h3><p>${esc(x.description||'Sem descrição.')}</p>${x.next?`<small class="muted">Próximo passo: ${esc(x.next)}</small>`:''}<div style="margin-top:14px"><button class="small-link" onclick="removeItem('ideas','${x.id}')">remover</button></div></div>`).join('')||'<div class="empty">Ainda não há ideias nessa categoria.</div>'}
+function renderEventDetail(){
+ const root=document.getElementById('eventDetail');
+ const event=data.events.find(x=>x.id===selectedEvent);
+ if(!event){
+  root.innerHTML='<div class="empty">Selecione um evento para abrir seu workspace.</div>';
+  return;
+ }
+ if(!Array.isArray(event.pages)) event.pages=[];
+ if(!event.pages.length) event.pages.push({id:uid(),name:'Planejamento geral',tasks:[]});
+ event.pages.forEach((page,index)=>{
+  if(!page.id) page.id=uid();
+  if(!page.name) page.name=`Página ${index+1}`;
+  if(!Array.isArray(page.tasks)) page.tasks=[];
+ });
+ if(!event.pages.some(page=>page.id===activeEventPage)) activeEventPage=event.pages[0].id;
+ const active=event.pages.find(page=>page.id===activeEventPage)||event.pages[0];
+ const tabs=event.pages.map(page=>`<button class="tab ${page.id===active.id?'active':''}" data-page-id="${esc(page.id)}" onclick="showEventPage('${page.id}')">${esc(page.name)}</button>`).join('');
+ const pages=event.pages.map(page=>{
+  const tasks=page.tasks.map((task,index)=>{
+   const text=typeof task==='string'?task:(task.text||task.title||'');
+   const done=typeof task==='object'&&!!task.done;
+   return `<div class="item"><label style="display:flex;align-items:center;gap:10px;flex:1"><input type="checkbox" ${done?'checked':''} onchange="toggleTask('${event.id}','${page.id}',${index},this.checked)"><span style="${done?'text-decoration:line-through;opacity:.6':''}">${esc(text)}</span></label><button class="small-link" onclick="deleteTask('${event.id}','${page.id}',${index})">excluir</button></div>`;
+  }).join('');
+  return `<section class="eventpage ${page.id===active.id?'':'hidden'}" id="ep-${page.id}"><div class="section-head"><div><div class="eyebrow">PÁGINA DO EVENTO</div><h3 style="font:500 23px Fraunces;margin:5px 0">${esc(page.name)}</h3><span class="muted">${page.tasks.filter(t=>!(typeof t==='object'&&t.done)).length} tarefas pendentes</span></div><button class="btn" onclick="addTask('${event.id}','${page.id}')">＋ Adicionar tarefa</button></div>${tasks||'<div class="empty">Nenhuma tarefa nesta página. Adicione a primeira.</div>'}</section>`;
+ }).join('');
+ root.innerHTML=`<div class="section-head"><div><div class="eyebrow">EVENT WORKSPACE</div><h2 style="font:500 27px Fraunces;margin:5px 0">${esc(event.name)}</h2><span class="muted">${dateBR(event.date)} · ${esc(event.place||'Local a definir')} · ${esc(event.status||'Planejamento')}</span></div><button class="small-link" onclick="addPage('${event.id}')">＋ Nova página</button></div><div class="tabs">${tabs}</div><div id="eventPages">${pages}</div>`;
+}
+function renderEvents(){
+ let list=document.getElementById('eventList');
+ if(!data.events.some(x=>x.id===selectedEvent)) selectedEvent=data.events[0]?.id||null;
+ list.innerHTML=data.events.map(e=>`<button class="event-choice ${selectedEvent===e.id?'active':''}" onclick="selectEvent('${e.id}')"><b>${esc(e.name)}</b><small>${dateBR(e.date)} · ${esc(e.status||'')}</small></button>`).join('')||'<div class="empty">Crie seu primeiro evento.</div>';
+ renderEventDetail();
+}
+function selectEvent(id){selectedEvent=id;activeEventPage=null;renderEvents()}
+function showEventPage(id){
+ activeEventPage=id;
+ document.querySelectorAll('#eventPages .eventpage').forEach(x=>x.classList.toggle('hidden',x.id!=='ep-'+id));
+ document.querySelectorAll('#eventDetail .tabs .tab').forEach(x=>x.classList.toggle('active',x.dataset.pageId===id));
+}
+function addPage(eid){let name=prompt('Nome da nova página:');if(!name||!name.trim())return;let e=data.events.find(x=>x.id===eid);if(!e)return;if(!Array.isArray(e.pages))e.pages=[];let page={id:uid(),name:name.trim(),tasks:[]};e.pages.push(page);activeEventPage=page.id;persist()}
+function addTask(eid,pid){let text=prompt('Descreva a tarefa:');if(!text||!text.trim())return;let e=data.events.find(x=>x.id===eid);let p=e?.pages?.find(x=>x.id===pid);if(!p)return;if(!Array.isArray(p.tasks))p.tasks=[];p.tasks.push({text:text.trim(),done:false});activeEventPage=pid;persist()}
+function toggleTask(eid,pid,i,done){let t=data.events.find(x=>x.id===eid).pages.find(x=>x.id===pid).tasks[i];if(typeof t==='string')t={text:t,done};else t.done=done;data.events.find(x=>x.id===eid).pages.find(x=>x.id===pid).tasks[i]=t;persist()}
+function deleteTask(eid,pid,i){data.events.find(x=>x.id===eid).pages.find(x=>x.id===pid).tasks.splice(i,1);persist()}
+function renderInstagram(){let f=document.getElementById('postFilter').value,arr=data.posts.filter(x=>f==='all'||x.status===f);document.getElementById('postIdeas').textContent=data.posts.filter(x=>x.status==='Ideia').length;document.getElementById('postScheduled').textContent=data.posts.filter(x=>x.status==='Agendado').length;document.getElementById('postPublished').textContent=data.posts.filter(x=>x.status==='Publicado').length;let next=data.posts.filter(x=>x.date&&x.date>=new Date().toISOString().slice(0,10)&&x.status!=='Publicado').sort((a,b)=>a.date.localeCompare(b.date))[0];document.getElementById('nextPost').textContent=next?dateBR(next.date):'—';
+document.getElementById('postsGrid').innerHTML=arr.map(x=>`<div class="card post"><div class="eyebrow">${esc(x.format)} · ${esc(x.pillar)}</div><h4>${esc(x.title)}</h4><p>${esc(x.description||'Sem roteiro ou legenda adicionados.')}</p><div class="item"><span class="pill ${x.status==='Publicado'?'':'blue'}">${esc(x.status)}</span><small>${dateBR(x.date)}</small></div>${x.link?`<a href="${esc(x.link)}" target="_blank" rel="noopener" class="small-link">abrir publicação ↗</a>`:''}<div style="margin-top:12px"><button class="small-link" onclick="removeItem('posts','${x.id}')">remover</button></div></div>`).join('')||'<div class="empty">Seu calendário de conteúdo começa com uma ideia.</div>'}
+function removeItem(group,id){if(!confirm('Deseja excluir este registro?'))return;data[group]=data[group].filter(x=>x.id!==id);if(group==='events'&&selectedEvent===id)selectedEvent=null;persist()}
+function addChecklistBoard(){
+ const name=prompt('Nome da nova subaba / caderno:');
+ if(!name||!name.trim())return;
+ if(!Array.isArray(data.checklists))data.checklists=[];
+ const board={id:uid(),name:name.trim(),tasks:[]};
+ data.checklists.push(board);
+ selectedChecklistBoard=board.id;
+ persist();
+}
+function renderChecklist(){if(!Array.isArray(data.checklists)||!data.checklists.length)data.checklists=[{id:'general-board',name:'Post-its',tasks:[]}];data.checklists.forEach((board,index)=>{if(!board.id)board.id=uid();if(!board.name)board.name=`Subaba ${index+1}`;if(!Array.isArray(board.tasks))board.tasks=[]});if(!data.checklists.some(b=>b.id===selectedChecklistBoard))selectedChecklistBoard=data.checklists[0].id;let b=data.checklists.find(x=>x.id===selectedChecklistBoard);document.getElementById('checklistBoards').innerHTML=data.checklists.map(x=>`<button class="board-btn ${x.id===selectedChecklistBoard?'active':''}" onclick="selectChecklistBoard('${x.id}')"><span>▤ ${esc(x.name)}</span><small>${(x.tasks||[]).filter(t=>!t.done).length}</small></button>`).join('');let tasks=b.tasks||[],rank={'Urgente':0,'Média':1,'Baixa':2};tasks.sort((a,c)=>(rank[a.priority]??3)-(rank[c.priority]??3)||(a.due||'9999').localeCompare(c.due||'9999'));document.getElementById('checklistContent').innerHTML=`<div class="section-head"><div><div class="eyebrow">CHECKLIST / ${esc(b.name)}</div><h3 style="font:500 25px Fraunces;margin:5px 0">${esc(b.name)}</h3><span class="muted">${tasks.filter(t=>!t.done).length} pendentes · ${tasks.filter(t=>t.done).length} concluídas</span></div><div><button class="small-link" onclick="renameChecklistBoard('${b.id}')">renomear</button> <button class="small-link" onclick="deleteChecklistBoard('${b.id}')">excluir subaba</button></div></div><div class="sticky-grid">${tasks.map(t=>`<article class="sticky-note priority-${t.priority==='Urgente'?'urgent':t.priority==='Média'?'medium':'low'} ${t.done?'completed':''}"><div class="sticky-meta"><span class="priority-chip">${esc(t.priority)}</span>${t.due?`<span class="muted" style="font-size:10px">Prazo: ${dateBR(t.due)}</span>`:''}</div><h4>${esc(t.title)}</h4>${t.description?`<p>${esc(t.description)}</p>`:''}<div class="sticky-footer"><label style="font-size:11px;color:#718084;display:flex;gap:6px;align-items:center"><input type="checkbox" ${t.done?'checked':''} onchange="toggleChecklistTask('${b.id}','${t.id}',this.checked)"> ${t.done?'Concluído':'Marcar como feito'}</label><button class="check-action" onclick="deleteChecklistTask('${b.id}','${t.id}')">excluir ×</button></div></article>`).join('')||'<div class="empty" style="grid-column:1/-1">Esta subaba está vazia. Crie um post-it para começar.</div>'}</div>`}
+function selectChecklistBoard(id){selectedChecklistBoard=id;renderChecklist()}
+function toggleChecklistTask(bid,tid,done){let b=data.checklists.find(x=>x.id===bid),t=b?.tasks?.find(x=>x.id===tid);if(!t)return;t.done=done;persist()}
+function deleteChecklistTask(bid,tid){if(!confirm('Excluir este post-it?'))return;let b=data.checklists.find(x=>x.id===bid);if(!b)return;b.tasks=(b.tasks||[]).filter(x=>x.id!==tid);persist()}
+function renameChecklistBoard(id){let b=data.checklists.find(x=>x.id===id),name=prompt('Novo nome da subaba:',b.name);if(!name||!name.trim())return;b.name=name.trim();persist()}
+function deleteChecklistBoard(id){let b=data.checklists.find(x=>x.id===id);if(!confirm(`Excluir a subaba "${b.name}" e todos os post-its dela?`))return;data.checklists=data.checklists.filter(x=>x.id!==id);selectedChecklistBoard=data.checklists[0]?.id||null;persist()}
+function renderLinks(){
+ const query=(document.getElementById('linkSearch')?.value||'').trim().toLocaleLowerCase('pt-BR');
+ const items=(data.links||[]).filter(x=>!query||String(x.title||'').toLocaleLowerCase('pt-BR').includes(query)||String(x.category||'').toLocaleLowerCase('pt-BR').includes(query)||String(x.notes||'').toLocaleLowerCase('pt-BR').includes(query));
+ document.getElementById('linksGrid').innerHTML=items.map(x=>`<div class="card idea"><div class="tag">${esc(x.category||'Outros')}</div><h3 style="font:500 20px Fraunces;margin:10px 0 7px">${esc(x.title)}</h3>${x.notes?`<p>${esc(x.notes)}</p>`:''}<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px"><a class="btn soft" href="${esc(x.url||'#')}" target="_blank" rel="noopener noreferrer" style="text-decoration:none">Abrir link ↗</a><button class="small-link" onclick="copyLink('${x.id}')">copiar endereço</button><button class="small-link" onclick="removeItem('links','${x.id}')">remover</button></div><div class="muted" style="font-size:10px;margin-top:10px;overflow-wrap:anywhere">${esc(x.url)}</div></div>`).join('')||'<div class="empty">Nenhum link encontrado. Adicione seu primeiro acesso importante.</div>';
+}
+function copyLink(id){let item=(data.links||[]).find(x=>x.id===id);if(item&&navigator.clipboard?.writeText)navigator.clipboard.writeText(item.url).then(()=>alert('Link copiado.')).catch(()=>alert(item.url));else if(item)alert(item.url)}
+function editPartner(id){openModal('partner-edit',{id})}
+function renderPartners(){
+ const query=(document.getElementById('partnerSearch')?.value||'').trim().toLocaleLowerCase('pt-BR');
+ const all=data.partners||[];
+ const items=all.filter(x=>[x.brand,x.relationship,x.status,x.contribution,x.contact,x.notes].some(v=>String(v||'').toLocaleLowerCase('pt-BR').includes(query)));
+ document.getElementById('partnerCount').textContent=all.length;
+ document.getElementById('partnerInvestmentCount').textContent=all.filter(x=>x.relationship==='Investimento').length;
+ document.getElementById('partnerPartnershipCount').textContent=all.filter(x=>x.relationship!=='Investimento').length;
+ document.getElementById('partnersGrid').innerHTML=items.map(x=>{
+  const closed=['Confirmado','Concluído'].includes(x.status);
+  return `<article class="card idea" style="${closed?'background:#edf5e9;border-color:#c9ddc2;':''}">
+   <div class="tag" style="${closed?'background:#dcebd5;color:#456b45;':''}">${esc(x.relationship||'Parceria')} · ${esc(x.status||'')}</div>
+   <h3 style="font:500 21px Fraunces;margin:10px 0 7px">${esc(x.brand)}</h3>
+   ${x.amount?`<div class="stat-value" style="font-size:20px;margin:7px 0">${money(x.amount)}</div>`:''}
+   ${x.contribution?`<p>${esc(x.contribution)}</p>`:''}
+   ${x.contact?`<div class="muted" style="margin-top:8px">Contato: ${esc(x.contact)}</div>`:''}
+   ${x.social?`<div class="muted" style="margin-top:5px;overflow-wrap:anywhere">${esc(x.social)}</div>`:''}
+   ${x.notes?`<p class="muted" style="margin-top:10px">${esc(x.notes)}</p>`:''}
+   <div style="margin-top:14px;display:flex;gap:14px"><button class="small-link" onclick="editPartner('${x.id}')">editar</button><button class="small-link" onclick="removeItem('partners','${x.id}')">remover registro</button></div>
+  </article>`;
+ }).join('')||'<div class="empty">Nenhuma marca cadastrada. Adicione sua primeira parceria ou investimento.</div>';
+}
+function renderAll(){
+ data.transactions ||= [];data.ideas ||= [];data.events ||= [];data.posts ||= [];data.links ||= [];data.partners ||= [];data.checklists ||= [];
+ renderDashboard();renderFinance();renderIdeas();renderEvents();renderInstagram();renderLinks();renderChecklist();renderPartners();
+}
+function exportCSV(){let rows=[['Tipo','Data','Descrição','Categoria','Evento','Status','Valor'],...data.transactions.map(x=>[x.type,x.date,x.description,x.category,x.event,x.status,x.amount])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='rara-financeiro.csv';a.click();URL.revokeObjectURL(a.href)}
+document.getElementById('todayLabel').textContent=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+function openSettings(){document.getElementById('settingsModal').classList.add('open');document.getElementById('sbUrl').value=localStorage.getItem('rara_sb_url')||'';document.getElementById('sbKey').value=localStorage.getItem('rara_sb_key')||''}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('open')}
+async function connectCloud(){let url=document.getElementById('sbUrl').value.trim(),key=document.getElementById('sbKey').value.trim(),email=document.getElementById('sbEmail').value.trim(),password=document.getElementById('sbPassword').value;if(!url||!key||!email||!password)return alert('Informe URL, chave pública, e-mail e senha.');localStorage.setItem('rara_sb_url',url);localStorage.setItem('rara_sb_key',key);try{cloud=window.supabase.createClient(url,key);let {error:authError}=await cloud.auth.signInWithPassword({email,password});if(authError)throw authError;let {data:row,error}=await cloud.from('rara_workspace').select('payload').eq('id','main').maybeSingle();if(error)throw error;if(row?.payload){data=row.payload;localStorage.setItem(KEY,JSON.stringify(data))}else{let {error:upErr}=await cloud.from('rara_workspace').upsert({id:'main',payload:data});if(upErr)throw upErr}cloud.channel('rara-live').on('postgres_changes',{event:'UPDATE',schema:'public',table:'rara_workspace',filter:'id=eq.main'},payload=>{if(payload.new?.payload){data=payload.new.payload;localStorage.setItem(KEY,JSON.stringify(data));renderAll()}}).subscribe();document.getElementById('syncDot').classList.add('on');document.getElementById('syncText').textContent='Conectado · Supabase';closeSettings();renderAll();alert('Conectado. Os dados serão compartilhados entre os usuários autorizados.')}catch(e){cloud=null;alert('Não foi possível conectar. Confira o SQL de instalação, a URL e a chave. Detalhe: '+e.message)}}
+async function saveCloud(){
+ if(!cloud)return;
+ const {error}=await cloud.from('rara_workspace').upsert({id:'main',payload:data,updated_at:new Date().toISOString()});
+ if(error){
+  console.error('Falha ao sincronizar com Supabase:',error);
+  document.getElementById('syncText').textContent='Erro na sincronização · confira as permissões';
+  throw error;
+ }
+ document.getElementById('syncText').textContent='Sincronizado · espaço RARA compartilhado';
+}
+
+renderAll();
+const initialRoute=location.hash.slice(1);if(initialRoute)go(initialRoute,false);
+if(localStorage.getItem('rara_sb_url')&&localStorage.getItem('rara_sb_key')){document.getElementById('sbUrl').value=localStorage.getItem('rara_sb_url');document.getElementById('sbKey').value=localStorage.getItem('rara_sb_key');document.getElementById('syncText').textContent='Credenciais salvas · reconecte';}
+</script></body></html>
