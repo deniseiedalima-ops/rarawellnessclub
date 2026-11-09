@@ -16,6 +16,11 @@
 
 .partner-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
 .partner-edit-btn{padding:8px 15px!important;font-size:13px!important;min-height:36px}
+
+.registration-intro{background:linear-gradient(110deg,#fffdfb,#f4f0ea);border-color:#e7ded4}
+.registration-actions{display:flex;gap:10px;align-items:center;white-space:nowrap}
+#registrations .data-table{min-width:850px}
+#registrations .toolbar .btn{white-space:nowrap}
 </style></head>
 <body>
 <div class="app">
@@ -25,7 +30,7 @@
  <nav class="nav">
   <button class="active" data-page="dashboard"><span class="ico">⌂</span>Dashboard</button>
   <button data-page="finance"><span class="ico">◷</span>Financeiro</button>
-  <button data-page="registrations"><span class="ico">▤</span>Inscrições</button>
+  <button data-page="registrations"><span class="ico">▤</span>INSCRIÇÕES</button>
   <button data-page="ideas"><span class="ico">✳</span>Ideias</button>
   <button data-page="events"><span class="ico">❋</span>Eventos</button>
   <button data-page="instagram"><span class="ico">◎</span>Instagram</button>
@@ -80,6 +85,11 @@
 </section>
 
 <section class="page" id="registrations">
+ <div class="card registration-intro" style="margin-bottom:16px">
+  <div class="eyebrow">RARA / EVENT MANAGEMENT</div>
+  <h2 style="font:500 28px Fraunces;margin:6px 0">Controle de inscrições</h2>
+  <p class="muted" style="margin:0">Cadastre cada participante, acompanhe os lotes e mantenha os pagamentos conectados ao Financeiro.</p>
+ </div>
  <div class="toolbar">
   <button class="btn" onclick="openModal('registration')">＋ Nova inscrição</button>
   <button class="btn soft" onclick="exportRegistrationsPDF()">Baixar inscrições em PDF</button>
@@ -210,19 +220,24 @@ document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',(
 function openModal(type,extra={}){modalType=type;document.getElementById('modal').classList.add('open');const body=document.getElementById('modalBody');let title='',fields='';
 const f=(label,name,kind='text',value='',opts='')=>{let control=kind==='textarea'?`<textarea name="${name}" ${opts}>${esc(value)}</textarea>`:kind==='select'?`<select name="${name}">${opts}</select>`:`<input name="${name}" type="${kind}" value="${esc(value)}" ${opts}>`;return `<div class="field"><label>${label}</label>${control}</div>`};
 if(type==='transaction'){title='Novo lançamento';fields=`<div class="formgrid">${f('Tipo','type','select','','<option value="expense">Despesa</option><option value="income">Receita</option>')}${f('Valor (R$)','amount','number','','step="0.01" min="0" required')}${f('Descrição','description','text','','required')}${f('Data','date','date',new Date().toISOString().slice(0,10))}${f('Categoria','category','select','','<option>Evento</option><option>Marketing</option><option>Fornecedor</option><option>Produto</option><option>Inscrição</option><option>Parceria</option><option>Operação</option><option>Transporte</option><option>Outros</option>')}${f('Status','status','select','','<option>Pago/Recebido</option><option>Pendente</option>')}${f('Evento relacionado','event','text','','placeholder="Ex.: The Soft Reset"')}${f('Observações','notes','textarea','','')}</div>`}
-if(type==='registration'){
- const eventOptions=(data.events||[]).map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('');
- title='Registrar inscrição';
- fields=`${f('Nome completo da inscrita','attendee','text','','required placeholder="Nome e sobrenome"')}
+if(type==='registration'||type==='registration-edit'){
+ const editing=type==='registration-edit';
+ const item=editing?(data.registrations||[]).find(r=>r.id===extra.id):null;
+ const eventOptions=(data.events||[]).map(e=>`<option value="${esc(e.id)}" ${item?.eventId===e.id?'selected':''}>${esc(e.name)}</option>`).join('');
+ const paymentOpt=v=>`<option value="${v}" ${item?.paymentStatus===v?'selected':''}>${v}</option>`;
+ const methodOpt=v=>`<option ${item?.paymentMethod===v?'selected':''}>${v}</option>`;
+ title=editing?'Editar inscrição':'Registrar nova inscrição';
+ fields=`${f('Nome completo da inscrita','attendee','text',item?.attendee||'','required placeholder="Nome e sobrenome"')}
  ${f('Evento','eventId','select','',eventOptions||'<option value="">Cadastre um evento primeiro</option>')}
- ${f('Lote adquirido','lot','text','','required placeholder="Ex.: 1º lote, lote promocional..."')}
- ${f('Valor pago (R$)','amount','number','','required min="0" step="0.01" placeholder="0,00"')}
- ${f('Data do pagamento','paymentDate','date',new Date().toISOString().slice(0,10))}
- ${f('Status do pagamento','paymentStatus','select','','<option value="Pago">Pago</option><option value="Pendente">Pendente</option>')}
- ${f('Forma de pagamento','paymentMethod','select','','<option>Pix</option><option>Cartão</option><option>Dinheiro</option><option>Transferência</option><option>Outro</option>')}
- ${f('WhatsApp / contato','phone','text','','placeholder="(99) 99999-9999"')}
- ${f('E-mail','email','email','','placeholder="opcional"')}
- ${f('Observações','notes','textarea','','placeholder="Comprovante, condições especiais, acompanhante..."')}`;
+ ${f('Lote adquirido','lot','text',item?.lot||'','required placeholder="Ex.: 1º lote, lote promocional..."')}
+ ${f('Valor pago (R$)','amount','number',item?.amount??'','required min="0" step="0.01" placeholder="0,00"')}
+ ${f('Data do pagamento','paymentDate','date',item?.paymentDate||new Date().toISOString().slice(0,10))}
+ ${f('Status do pagamento','paymentStatus','select','',`${paymentOpt('Pago')}${paymentOpt('Pendente')}`)}
+ ${f('Forma de pagamento','paymentMethod','select','',`${methodOpt('Pix')}${methodOpt('Cartão')}${methodOpt('Dinheiro')}${methodOpt('Transferência')}${methodOpt('Outro')}`)}
+ ${f('WhatsApp / contato','phone','text',item?.phone||'','placeholder="(99) 99999-9999"')}
+ ${f('E-mail','email','email',item?.email||'','placeholder="opcional"')}
+ ${f('Observações','notes','textarea',item?.notes||'','placeholder="Comprovante, condições especiais, acompanhante..."')}`;
+ if(editing) window.editingRegistrationId=item?.id||null;
 }
 if(type==='idea'){title='Capturar ideia';fields=`${f('Título','title','text','','required')}${f('Categoria','category','select','','<option>Experiências</option><option>Parcerias</option><option>Produtos</option><option>Conteúdo</option><option>Operação</option><option>Outras</option>')}${f('Descrição / referências','description','textarea')}${f('Próximo passo','next','text')}`}
 if(type==='event'){title='Criar evento';fields=`${f('Nome do evento','name','text','','required')}${f('Data','date','date')}${f('Local','place')}${f('Status','status','select','','<option>Em planejamento</option><option>Confirmado</option><option>Realizado</option><option>Adiado</option>')}${f('Descrição','description','textarea')}`}
@@ -251,23 +266,33 @@ function saveModal(){
  const id=uid();
  try{
   if(modalType==='transaction') data.transactions.unshift({id,type:val('type'),amount:+val('amount'),description:val('description'),date:val('date'),category:val('category'),status:val('status'),event:val('event'),notes:val('notes')});
-  else if(modalType==='registration'){
-   const attendee=val('attendee').trim();
-   const eventId=val('eventId');
-   const event=data.events.find(e=>e.id===eventId);
-   const amount=Number(val('amount')||0);
-   const paymentStatus=val('paymentStatus');
+  else if(modalType==='registration'||modalType==='registration-edit'){
+   const attendee=val('attendee').trim(),eventId=val('eventId'),event=data.events.find(e=>e.id===eventId);
+   const amount=Number(val('amount')||0),paymentStatus=val('paymentStatus');
    if(!attendee){alert('Informe o nome da inscrita.');return}
    if(!event){alert('Selecione um evento válido.');return}
    if(!val('lot').trim()){alert('Informe o lote adquirido.');return}
-   if(amount<0 || !Number.isFinite(amount)){alert('Informe um valor válido.');return}
-   const registration={id,attendee,eventId,eventName:event.name,lot:val('lot').trim(),amount,paymentDate:val('paymentDate'),paymentStatus,paymentMethod:val('paymentMethod'),phone:val('phone').trim(),email:val('email').trim(),notes:val('notes').trim(),created:new Date().toISOString(),transactionId:null};
+   if(!Number.isFinite(amount)||amount<0){alert('Informe um valor válido.');return}
+   const record={attendee,eventId,eventName:event.name,lot:val('lot').trim(),amount,paymentDate:val('paymentDate'),paymentStatus,paymentMethod:val('paymentMethod'),phone:val('phone').trim(),email:val('email').trim(),notes:val('notes').trim()};
+   let registration;
+   if(modalType==='registration-edit'){
+    registration=data.registrations.find(r=>r.id===window.editingRegistrationId);
+    if(!registration){alert('Inscrição não encontrada.');return}
+    Object.assign(registration,record);
+   }else{
+    registration={id,...record,created:new Date().toISOString(),transactionId:null};
+    data.registrations.unshift(registration);
+   }
+   if(registration.transactionId){
+    data.transactions=data.transactions.filter(t=>t.id!==registration.transactionId);
+    registration.transactionId=null;
+   }
    if(paymentStatus==='Pago'){
     const transactionId=uid();
-    data.transactions.unshift({id:transactionId,type:'income',amount,description:`Inscrição — ${attendee} (${registration.lot})`,date:registration.paymentDate||new Date().toISOString().slice(0,10),category:'Inscrição',status:'Pago/Recebido',event:event.name,notes:`Participante: ${attendee} · Forma: ${registration.paymentMethod}${registration.phone?' · WhatsApp: '+registration.phone:''}`});
+    data.transactions.unshift({id:transactionId,type:'income',amount,description:`Inscrição — ${attendee} (${record.lot})`,date:record.paymentDate||new Date().toISOString().slice(0,10),category:'Inscrição',status:'Pago/Recebido',event:event.name,notes:`Participante: ${attendee} · Forma: ${record.paymentMethod}${record.phone?' · WhatsApp: '+record.phone:''}`});
     registration.transactionId=transactionId;
    }
-   data.registrations.unshift(registration);
+   window.editingRegistrationId=null;
   }
   else if(modalType==='idea') data.ideas.unshift({id,title:val('title').trim(),category:val('category'),description:val('description'),next:val('next'),created:new Date().toISOString()});
   else if(modalType==='event') data.events.push({id,name:val('name').trim(),date:val('date'),place:val('place'),status:val('status'),description:val('description'),pages:[{id:uid(),name:'Planejamento geral',tasks:[]}]});
@@ -434,9 +459,10 @@ function renderRegistrations(){
   <td>${esc(r.eventName||'—')}</td><td>${esc(r.lot||'—')}</td><td>${r.paymentDate?dateBR(r.paymentDate):'—'}</td>
   <td><span class="pill ${r.paymentStatus==='Pago'?'':'pink'}">${esc(r.paymentStatus||'Pendente')}</span></td>
   <td class="amount-in">${money(r.amount||0)}</td>
-  <td><button class="small-link" onclick="removeRegistration('${r.id}')">excluir</button></td>
+  <td><div class="registration-actions"><button class="small-link" onclick="editRegistration('${r.id}')">editar</button><button class="small-link" onclick="removeRegistration('${r.id}')">excluir</button></div></td>
  </tr>`).join('')||'<tr><td colspan="7" class="empty">Nenhuma inscrição encontrada.</td></tr>';
 }
+function editRegistration(id){openModal('registration-edit',{id})}
 function removeRegistration(id){
  const r=(data.registrations||[]).find(x=>x.id===id);
  if(!r)return;
@@ -455,7 +481,7 @@ function exportRegistrationsPDF(){
  const body=rows.map(r=>`<tr><td>${escHtml(r.attendee)}</td><td>${escHtml(r.eventName)}</td><td>${escHtml(r.lot)}</td><td>${escHtml(r.paymentDate?dateBR(r.paymentDate):'—')}</td><td>${escHtml(r.paymentStatus)}</td><td>${escHtml(money(r.amount||0))}</td><td>${escHtml(r.paymentMethod||'—')}</td><td>${escHtml(r.phone||'—')}</td></tr>`).join('');
  const w=window.open('','_blank');
  if(!w){alert('Permita pop-ups para gerar o PDF.');return}
- w.document.write(`<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><title>Inscrições RARA</title><style>body{font:12px Arial,sans-serif;color:#344b55;padding:28px}h1{font:26px Georgia;color:#344b55;margin:0}p{color:#718188}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:9px 7px;border-bottom:1px solid #ddd;text-align:left}th{background:#f3eee8}tfoot{font-weight:bold}@media print{body{padding:0}}</style></head><body onload="window.print()"><h1>rara · wellness club</h1><h2>Lista de inscrições</h2><p>Evento: ${escHtml(eventName)} · Gerado em ${new Date().toLocaleDateString('pt-BR')}</p><p>Total de inscritas: ${rows.length} · Pagamentos recebidos: ${escHtml(money(total))}</p><table><thead><tr><th>Inscrita</th><th>Evento</th><th>Lote</th><th>Pagamento</th><th>Status</th><th>Valor</th><th>Forma</th><th>Contato</th></tr></thead><tbody>${body||'<tr><td colspan="8">Nenhuma inscrição cadastrada.</td></tr>'}</tbody></table></body></html>`);
+ w.document.write(`<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><title>Inscrições RARA</title><style>body{font:12px Arial,sans-serif;color:#344b55;padding:28px}h1{font:26px Georgia;color:#344b55;margin:0}p{color:#718188}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:9px 7px;border-bottom:1px solid #ddd;text-align:left}th{background:#f3eee8}tfoot{font-weight:bold}@media print{body{padding:0}}</style></head><body onload="setTimeout(()=>window.print(),250)"><h1>rara · wellness club</h1><h2>Lista de inscrições</h2><p>Evento: ${escHtml(eventName)} · Gerado em ${new Date().toLocaleDateString('pt-BR')}</p><p>Total de inscritas: ${rows.length} · Pagamentos recebidos: ${escHtml(money(total))}</p><table><thead><tr><th>Inscrita</th><th>Evento</th><th>Lote</th><th>Pagamento</th><th>Status</th><th>Valor</th><th>Forma</th><th>Contato</th></tr></thead><tbody>${body||'<tr><td colspan="8">Nenhuma inscrição cadastrada.</td></tr>'}</tbody></table></body></html>`);
  w.document.close();
 }
 function renderAll(){
