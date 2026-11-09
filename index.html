@@ -25,6 +25,7 @@
  <nav class="nav">
   <button class="active" data-page="dashboard"><span class="ico">⌂</span>Dashboard</button>
   <button data-page="finance"><span class="ico">◷</span>Financeiro</button>
+  <button data-page="registrations"><span class="ico">▤</span>Inscrições</button>
   <button data-page="ideas"><span class="ico">✳</span>Ideias</button>
   <button data-page="events"><span class="ico">❋</span>Eventos</button>
   <button data-page="instagram"><span class="ico">◎</span>Instagram</button>
@@ -76,6 +77,25 @@
   </div></div>
  </div>
  <div class="card" style="margin-top:16px"><div class="section-head"><h3>Todos os lançamentos</h3><span class="muted" id="financeCaption"></span></div><div class="tablewrap"><table class="data-table"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Evento</th><th>Status</th><th>Valor</th><th></th></tr></thead><tbody id="transactionsBody"></tbody></table></div></div>
+</section>
+
+<section class="page" id="registrations">
+ <div class="toolbar">
+  <button class="btn" onclick="openModal('registration')">＋ Nova inscrição</button>
+  <button class="btn soft" onclick="exportRegistrationsPDF()">Baixar inscrições em PDF</button>
+  <select id="registrationEventFilter" onchange="renderRegistrations()" style="max-width:220px"><option value="all">Todos os eventos</option></select>
+  <input id="registrationSearch" type="search" placeholder="Buscar inscrita..." oninput="renderRegistrations()" style="max-width:220px">
+ </div>
+ <div class="grid stats">
+  <div class="card"><div class="stat-label">Inscrições registradas</div><div class="stat-value" id="registrationCount">0</div></div>
+  <div class="card"><div class="stat-label">Pagamentos recebidos</div><div class="stat-value amount-in" id="registrationPaidTotal">R$ 0</div></div>
+  <div class="card"><div class="stat-label">Pagamentos pendentes</div><div class="stat-value" id="registrationPendingCount">0</div></div>
+  <div class="card"><div class="stat-label">Vagas por evento</div><div class="stat-value" id="registrationEventCount">0</div></div>
+ </div>
+ <div class="notice">Cada inscrição com status “Pago” gera automaticamente uma receita no Financeiro, vinculada ao evento e à participante. Inscrições pendentes não entram nas receitas até a confirmação do pagamento.</div>
+ <div class="card"><div class="section-head"><h3>Lista de inscritas</h3><span class="muted" id="registrationCaption"></span></div>
+  <div class="tablewrap"><table class="data-table"><thead><tr><th>Inscrita</th><th>Evento</th><th>Lote</th><th>Data do pagamento</th><th>Status</th><th>Valor pago</th><th></th></tr></thead><tbody id="registrationsBody"></tbody></table></div>
+ </div>
 </section>
 
 <section class="page" id="ideas">
@@ -135,10 +155,10 @@
 
 <script>
 const KEY='rara_hub_v1';
-const initial={transactions:[],ideas:[],partners:[],events:[{id:'soft-reset',name:'The Soft Reset',date:'2026-12-05',place:'Espaço Bougainville · Imperatriz, MA',status:'Em planejamento',description:'Primeiro encontro oficial da RARA Wellness Club.',pages:[{id:'p1',name:'Planejamento geral',tasks:['Confirmar fornecedores e orçamento','Fechar parcerias e expositoras','Definir programação final','Organizar inscrições e pagamentos','Contratar fotografia e cobertura','Preparar kits de Vision Board']},{id:'p2',name:'Experiência & ambientação',tasks:['Planejar aula de alongamento','Alinhar palestra com psicóloga','Organizar atividade de Vision Board','Definir coffee break','Preparar sinalização e decoração']}]}],posts:[]};
+const initial={transactions:[],registrations:[],ideas:[],partners:[],events:[{id:'soft-reset',name:'The Soft Reset',date:'2026-12-05',place:'Espaço Bougainville · Imperatriz, MA',status:'Em planejamento',description:'Primeiro encontro oficial da RARA Wellness Club.',pages:[{id:'p1',name:'Planejamento geral',tasks:['Confirmar fornecedores e orçamento','Fechar parcerias e expositoras','Definir programação final','Organizar inscrições e pagamentos','Contratar fotografia e cobertura','Preparar kits de Vision Board']},{id:'p2',name:'Experiência & ambientação',tasks:['Planejar aula de alongamento','Alinhar palestra com psicóloga','Organizar atividade de Vision Board','Definir coffee break','Preparar sinalização e decoração']}]}],posts:[]};
 let data=load(), cloud=null, selectedEvent=null, activeEventPage=null, activePage='dashboard', modalType=null;
 if(!data || typeof data!=='object' || Array.isArray(data)) data=structuredClone(initial);
-for(const key of ['transactions','ideas','partners','events','posts','links']) if(!Array.isArray(data[key])) data[key]=[];
+for(const key of ['transactions','registrations','ideas','partners','events','posts','links']) if(!Array.isArray(data[key])) data[key]=[];
 if(!Array.isArray(data.checklists)) data.checklists=[];
 if(!data.checklists.length) data.checklists=[{id:"general-board",name:"Post-its",tasks:[]}];
 data.checklists=data.checklists.map((board,index)=>({
@@ -175,12 +195,12 @@ function money(n){return Number(n||0).toLocaleString('pt-BR',{style:'currency',c
 function dateBR(d){if(!d)return '—';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR')}
 function daysTo(d){return Math.ceil((new Date(d+'T00:00:00')-new Date(new Date().toDateString()))/86400000)}
 function go(p, updateHash=true){
- const allowed=['dashboard','finance','ideas','events','instagram','links','checklist','partners'];
+ const allowed=['dashboard','finance','registrations','ideas','events','instagram','links','checklist','partners'];
  if(!allowed.includes(p)) p='dashboard';
  activePage=p;
  document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===p));
  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
- document.getElementById('pageTitle').textContent={dashboard:'Dashboard',finance:'Financeiro',ideas:'Ideias',events:'Eventos',instagram:'Instagram',links:'Links',checklist:'Checklist',partners:'Parceiros'}[p];
+ document.getElementById('pageTitle').textContent={dashboard:'Dashboard',finance:'Financeiro',registrations:'Inscrições',ideas:'Ideias',events:'Eventos',instagram:'Instagram',links:'Links',checklist:'Checklist',partners:'Parceiros'}[p];
  if(updateHash && location.hash!=='#'+p) history.replaceState(null,'','#'+p);
  renderAll();
  window.scrollTo({top:0,behavior:'smooth'});
@@ -190,6 +210,20 @@ document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',(
 function openModal(type,extra={}){modalType=type;document.getElementById('modal').classList.add('open');const body=document.getElementById('modalBody');let title='',fields='';
 const f=(label,name,kind='text',value='',opts='')=>{let control=kind==='textarea'?`<textarea name="${name}" ${opts}>${esc(value)}</textarea>`:kind==='select'?`<select name="${name}">${opts}</select>`:`<input name="${name}" type="${kind}" value="${esc(value)}" ${opts}>`;return `<div class="field"><label>${label}</label>${control}</div>`};
 if(type==='transaction'){title='Novo lançamento';fields=`<div class="formgrid">${f('Tipo','type','select','','<option value="expense">Despesa</option><option value="income">Receita</option>')}${f('Valor (R$)','amount','number','','step="0.01" min="0" required')}${f('Descrição','description','text','','required')}${f('Data','date','date',new Date().toISOString().slice(0,10))}${f('Categoria','category','select','','<option>Evento</option><option>Marketing</option><option>Fornecedor</option><option>Produto</option><option>Inscrição</option><option>Parceria</option><option>Operação</option><option>Transporte</option><option>Outros</option>')}${f('Status','status','select','','<option>Pago/Recebido</option><option>Pendente</option>')}${f('Evento relacionado','event','text','','placeholder="Ex.: The Soft Reset"')}${f('Observações','notes','textarea','','')}</div>`}
+if(type==='registration'){
+ const eventOptions=(data.events||[]).map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('');
+ title='Registrar inscrição';
+ fields=`${f('Nome completo da inscrita','attendee','text','','required placeholder="Nome e sobrenome"')}
+ ${f('Evento','eventId','select','',eventOptions||'<option value="">Cadastre um evento primeiro</option>')}
+ ${f('Lote adquirido','lot','text','','required placeholder="Ex.: 1º lote, lote promocional..."')}
+ ${f('Valor pago (R$)','amount','number','','required min="0" step="0.01" placeholder="0,00"')}
+ ${f('Data do pagamento','paymentDate','date',new Date().toISOString().slice(0,10))}
+ ${f('Status do pagamento','paymentStatus','select','','<option value="Pago">Pago</option><option value="Pendente">Pendente</option>')}
+ ${f('Forma de pagamento','paymentMethod','select','','<option>Pix</option><option>Cartão</option><option>Dinheiro</option><option>Transferência</option><option>Outro</option>')}
+ ${f('WhatsApp / contato','phone','text','','placeholder="(99) 99999-9999"')}
+ ${f('E-mail','email','email','','placeholder="opcional"')}
+ ${f('Observações','notes','textarea','','placeholder="Comprovante, condições especiais, acompanhante..."')}`;
+}
 if(type==='idea'){title='Capturar ideia';fields=`${f('Título','title','text','','required')}${f('Categoria','category','select','','<option>Experiências</option><option>Parcerias</option><option>Produtos</option><option>Conteúdo</option><option>Operação</option><option>Outras</option>')}${f('Descrição / referências','description','textarea')}${f('Próximo passo','next','text')}`}
 if(type==='event'){title='Criar evento';fields=`${f('Nome do evento','name','text','','required')}${f('Data','date','date')}${f('Local','place')}${f('Status','status','select','','<option>Em planejamento</option><option>Confirmado</option><option>Realizado</option><option>Adiado</option>')}${f('Descrição','description','textarea')}`}
 if(type==='post'){title='Novo conteúdo';fields=`${f('Título / ideia','title','text','','required')}${f('Formato','format','select','','<option>Reels</option><option>Carrossel</option><option>Stories</option><option>Foto</option><option>Live</option>')}${f('Pilar','pillar','select','','<option>Wellness</option><option>Movimento</option><option>Criatividade</option><option>Comunidade</option><option>Bastidores</option><option>Institucional</option>')}${f('Data de publicação','date','date')}${f('Status','status','select','','<option>Ideia</option><option>Em produção</option><option>Agendado</option><option>Publicado</option>')}${f('Legenda / roteiro / referências','description','textarea')}${f('Link do post publicado','link','url')}`}
@@ -217,6 +251,24 @@ function saveModal(){
  const id=uid();
  try{
   if(modalType==='transaction') data.transactions.unshift({id,type:val('type'),amount:+val('amount'),description:val('description'),date:val('date'),category:val('category'),status:val('status'),event:val('event'),notes:val('notes')});
+  else if(modalType==='registration'){
+   const attendee=val('attendee').trim();
+   const eventId=val('eventId');
+   const event=data.events.find(e=>e.id===eventId);
+   const amount=Number(val('amount')||0);
+   const paymentStatus=val('paymentStatus');
+   if(!attendee){alert('Informe o nome da inscrita.');return}
+   if(!event){alert('Selecione um evento válido.');return}
+   if(!val('lot').trim()){alert('Informe o lote adquirido.');return}
+   if(amount<0 || !Number.isFinite(amount)){alert('Informe um valor válido.');return}
+   const registration={id,attendee,eventId,eventName:event.name,lot:val('lot').trim(),amount,paymentDate:val('paymentDate'),paymentStatus,paymentMethod:val('paymentMethod'),phone:val('phone').trim(),email:val('email').trim(),notes:val('notes').trim(),created:new Date().toISOString(),transactionId:null};
+   if(paymentStatus==='Pago'){
+    const transactionId=uid();
+    data.transactions.unshift({id:transactionId,type:'income',amount,description:`Inscrição — ${attendee} (${registration.lot})`,date:registration.paymentDate||new Date().toISOString().slice(0,10),category:'Inscrição',status:'Pago/Recebido',event:event.name,notes:`Participante: ${attendee} · Forma: ${registration.paymentMethod}${registration.phone?' · WhatsApp: '+registration.phone:''}`});
+    registration.transactionId=transactionId;
+   }
+   data.registrations.unshift(registration);
+  }
   else if(modalType==='idea') data.ideas.unshift({id,title:val('title').trim(),category:val('category'),description:val('description'),next:val('next'),created:new Date().toISOString()});
   else if(modalType==='event') data.events.push({id,name:val('name').trim(),date:val('date'),place:val('place'),status:val('status'),description:val('description'),pages:[{id:uid(),name:'Planejamento geral',tasks:[]}]});
   else if(modalType==='partner'||modalType==='partner-edit'){
@@ -363,9 +415,52 @@ function renderPartners(){
   </article>`;
  }).join('')||'<div class="empty">Nenhuma marca cadastrada. Adicione sua primeira parceria ou investimento.</div>';
 }
+function renderRegistrations(){
+ const eventFilter=document.getElementById('registrationEventFilter');
+ const previous=eventFilter.value;
+ eventFilter.innerHTML='<option value="all">Todos os eventos</option>'+(data.events||[]).map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('');
+ if([...eventFilter.options].some(o=>o.value===previous)) eventFilter.value=previous;
+ const query=(document.getElementById('registrationSearch')?.value||'').trim().toLocaleLowerCase('pt-BR');
+ const all=data.registrations||[];
+ const filtered=all.filter(r=>(eventFilter.value==='all'||r.eventId===eventFilter.value)&&[r.attendee,r.eventName,r.lot,r.phone,r.email].some(v=>String(v||'').toLocaleLowerCase('pt-BR').includes(query)));
+ const paid=all.filter(r=>r.paymentStatus==='Pago').reduce((sum,r)=>sum+Number(r.amount||0),0);
+ document.getElementById('registrationCount').textContent=all.length;
+ document.getElementById('registrationPaidTotal').textContent=money(paid);
+ document.getElementById('registrationPendingCount').textContent=all.filter(r=>r.paymentStatus!=='Pago').length;
+ document.getElementById('registrationEventCount').textContent=new Set(all.map(r=>r.eventId)).size;
+ document.getElementById('registrationCaption').textContent=`${filtered.length} de ${all.length} inscrições`;
+ document.getElementById('registrationsBody').innerHTML=filtered.map(r=>`<tr>
+  <td><b>${esc(r.attendee)}</b><div class="muted">${esc(r.phone||r.email||'')}</div></td>
+  <td>${esc(r.eventName||'—')}</td><td>${esc(r.lot||'—')}</td><td>${r.paymentDate?dateBR(r.paymentDate):'—'}</td>
+  <td><span class="pill ${r.paymentStatus==='Pago'?'':'pink'}">${esc(r.paymentStatus||'Pendente')}</span></td>
+  <td class="amount-in">${money(r.amount||0)}</td>
+  <td><button class="small-link" onclick="removeRegistration('${r.id}')">excluir</button></td>
+ </tr>`).join('')||'<tr><td colspan="7" class="empty">Nenhuma inscrição encontrada.</td></tr>';
+}
+function removeRegistration(id){
+ const r=(data.registrations||[]).find(x=>x.id===id);
+ if(!r)return;
+ if(!confirm(`Excluir a inscrição de ${r.attendee}?${r.transactionId?' O lançamento correspondente também será removido do Financeiro.':''}`))return;
+ data.registrations=data.registrations.filter(x=>x.id!==id);
+ if(r.transactionId)data.transactions=data.transactions.filter(x=>x.id!==r.transactionId);
+ persist();
+}
+function exportRegistrationsPDF(){
+ const selected=document.getElementById('registrationEventFilter').value;
+ const query=(document.getElementById('registrationSearch')?.value||'').trim().toLocaleLowerCase('pt-BR');
+ const rows=(data.registrations||[]).filter(r=>(selected==='all'||r.eventId===selected)&&[r.attendee,r.eventName,r.lot,r.phone,r.email].some(v=>String(v||'').toLocaleLowerCase('pt-BR').includes(query)));
+ const eventName=selected==='all'?'Todos os eventos':(data.events.find(e=>e.id===selected)?.name||'Evento');
+ const escHtml=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const total=rows.filter(r=>r.paymentStatus==='Pago').reduce((a,r)=>a+Number(r.amount||0),0);
+ const body=rows.map(r=>`<tr><td>${escHtml(r.attendee)}</td><td>${escHtml(r.eventName)}</td><td>${escHtml(r.lot)}</td><td>${escHtml(r.paymentDate?dateBR(r.paymentDate):'—')}</td><td>${escHtml(r.paymentStatus)}</td><td>${escHtml(money(r.amount||0))}</td><td>${escHtml(r.paymentMethod||'—')}</td><td>${escHtml(r.phone||'—')}</td></tr>`).join('');
+ const w=window.open('','_blank');
+ if(!w){alert('Permita pop-ups para gerar o PDF.');return}
+ w.document.write(`<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><title>Inscrições RARA</title><style>body{font:12px Arial,sans-serif;color:#344b55;padding:28px}h1{font:26px Georgia;color:#344b55;margin:0}p{color:#718188}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:9px 7px;border-bottom:1px solid #ddd;text-align:left}th{background:#f3eee8}tfoot{font-weight:bold}@media print{body{padding:0}}</style></head><body onload="window.print()"><h1>rara · wellness club</h1><h2>Lista de inscrições</h2><p>Evento: ${escHtml(eventName)} · Gerado em ${new Date().toLocaleDateString('pt-BR')}</p><p>Total de inscritas: ${rows.length} · Pagamentos recebidos: ${escHtml(money(total))}</p><table><thead><tr><th>Inscrita</th><th>Evento</th><th>Lote</th><th>Pagamento</th><th>Status</th><th>Valor</th><th>Forma</th><th>Contato</th></tr></thead><tbody>${body||'<tr><td colspan="8">Nenhuma inscrição cadastrada.</td></tr>'}</tbody></table></body></html>`);
+ w.document.close();
+}
 function renderAll(){
- data.transactions ||= [];data.ideas ||= [];data.events ||= [];data.posts ||= [];data.links ||= [];data.partners ||= [];data.checklists ||= [];
- renderDashboard();renderFinance();renderIdeas();renderEvents();renderInstagram();renderLinks();renderChecklist();renderPartners();
+ data.transactions ||= [];data.registrations ||= [];data.ideas ||= [];data.events ||= [];data.posts ||= [];data.links ||= [];data.partners ||= [];data.checklists ||= [];
+ renderDashboard();renderFinance();renderRegistrations();renderIdeas();renderEvents();renderInstagram();renderLinks();renderChecklist();renderPartners();
 }
 function exportCSV(){let rows=[['Tipo','Data','Descrição','Categoria','Evento','Status','Valor'],...data.transactions.map(x=>[x.type,x.date,x.description,x.category,x.event,x.status,x.amount])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='rara-financeiro.csv';a.click();URL.revokeObjectURL(a.href)}
 document.getElementById('todayLabel').textContent=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
